@@ -6,11 +6,15 @@ from random import randint
 
 
 #MODEL
-groupmembers = 18
 teamnameV = np.matrix(["Toulouse", "Cergy", "Meudon", "Amneville", "Francais_Volants", "Asnieres", "Valence", "Avignon", "Marseille", "Chambery", "Annecy", "Limoges", "Clermont", "Villard", "Roanne", "Evry", "Strasbourg", "Wasquehal"])
-N = len(teamnameV)
 distanceM = np.matrix('0.0 717.0 667.0 1015.0 673.0 686.0 449.0 344.0 417.0 604.0 665.0 291.0 408.0 517.0 504.0 668.0 973.0 901.0; 717.0 0.0 52.0 364.0 42.0 22.0 599.0 727.0 813.0 610.0 597.0 426.0 458.0 634.0 435.0 70.0 526.0 236.0; 667.0 52.0 0.0 340.0 7.0 20.0 558.0 686.0 772.0 569.0 556.0 376.0 409.0 593.0 394.0 29.0 502.0 239.0; 1015.0 364.0 340.0 0.0 332.0 336.0 572.0 700.0 787.0 583.0 555.0 725.0 615.0 607.0 487.0 340.0 176.0 391.0; 673.0 42.0 7.0 332.0 0.0 14.0 563.0 691.0 777.0 574.0 561.0 385.0 417.0 598.0 399.0 35.0 494.0 232.0; 686.0 22.0 20.0 336.0 14.0 0.0 574.0 702.0 788.0 585.0 572.0 396.0 428.0 609.0 410.0 46.0 507.0 224.0; 449.0 599.0 558.0 572.0 563.0 574.0 0.0 130.0 217.0 154.0 216.0 506.0 264.0 68.0 205.0 531.0 592.0 793.0; 344.0 727.0 686.0 700.0 691.0 702.0 130.0 0.0 95.0 286.0 347.0 634.0 392.0 199.0 333.0 659.0 720.0 921.0; 417.0 813.0 772.0 787.0 777.0 788.0 217.0 95.0 0.0 372.0 434.0 692.0 479.0 286.0 419.0 746.0 807.0 1007.0; 604.0 610.0 569.0 583.0 574.0 585.0 154.0 286.0 372.0 0.0 62.0 516.0 273.0 102.0 197.0 542.0 479.0 804.0; 665.0 597.0 556.0 555.0 561.0 572.0 216.0 347.0 434.0 62.0 0.0 558.0 316.0 161.0 240.0 530.0 432.0 775.0; 291.0 426.0 376.0 725.0 385.0 396.0 506.0 634.0 692.0 516.0 558.0 0.0 259.0 540.0 289.0 381.0 731.0 613.0; 408.0 458.0 409.0 615.0 417.0 428.0 264.0 392.0 479.0 273.0 316.0 259.0 0.0 296.0 111.0 410.0 635.0 642.0; 517.0 634.0 593.0 607.0 598.0 609.0 68.0 199.0 286.0 102.0 161.0 540.0 296.0 0.0 219.0 564.0 597.0 826.0; 504.0 435.0 394.0 487.0 399.0 410.0 205.0 333.0 419.0 197.0 240.0 289.0 111.0 219.0 0.0 370.0 505.0 622.0; 668.0 70.0 29.0 340.0 35.0 46.0 531.0 659.0 746.0 542.0 530.0 381.0 410.0 564.0 370.0 0.0 503.0 255.0; 973.0 526.0 502.0 176.0 494.0 507.0 592.0 720.0 807.0 479.0 432.0 731.0 635.0 597.0 505.0 503.0 0.0 553.0; 901.0 236.0 239.0 391.0 232.0 224.0 793.0 921.0 1007.0 804.0 775.0 613.0 642.0 826.0 622.0 255.0 553.0 0.0')
 standingV = np.matrix('1 3 4 7 8 11 12 16 18 2 5 6 9 10 13 14 15 17')
+N = teamnameV.shape[1]
+
+#Stadard Configuration
+numberOfIndividuums = 100
+numberOfGenerations = 10
+percentageOfDeath   = 0.5
 
 class Individuum(object):
 
@@ -20,7 +24,7 @@ class Individuum(object):
 		self.totalStanding = -1
 		self.eval()
 
-# TODO :: check correctness of the function
+#TODO :: check correctness of the function
 	def dominates (self, other):
 		return (self.totalDistance <= other.totalDistance and self.totalStanding <= other.totalStanding)
 		
@@ -29,21 +33,17 @@ class Individuum(object):
 		self.evalDistance()
 		self.evalStanding() 
 
-# TODO :: check correctness of the function
+#TODO :: check correctness of the function
 	def evalDistance(self):
 		self.totalDistance = (self.DNA * distanceM * self.DNA.T)[0,0]
 
-# TODO :: check correctness of the function
+#TODO :: check correctness of the function
 	def evalStanding(self):
 		# 1. Version
 		self.totalStanding = np.fabs((self.DNA * standingV.T) - (np.logical_not(self.DNA) * standingV.T))[0,0]
 		# 2. Version
-		self.totalStanding = self.calculateTotalStanding()
-		
-	def calculateTotalStanding(self):
-	# ToDo
+#		self.totalStanding = np.sum(np.fabs(np.sort(standingV[self.DNA]) - np.sort(standingV[np.logical_not(self.DNA)])))
 	
-#TODO
 	#COMPARING two individuums
 	def __lt__(self, other):
 		return self.totalDistance < other.totalDistance and self.totalStanding < other.totalStanding
@@ -74,8 +74,8 @@ class Generation(object):
 		# Matrix of the form:
 		#  [0] all the individuums with prank == 0
 		#  [1] all the individuums with prank == 1
-		#  ...
-		self.fronts = []		# fronts[0][0] = (individuum, dominationCount, dominatedIndividuums)
+		#  [len(paretoFront)-1] the rest
+		# fronts[0][0] = (individuum)
 		
 		self.totalDistance = -1
 		self.totalStanding = -1
@@ -130,23 +130,38 @@ class Evolution(object):
 		self.generations = generations
 		self.paretoFront = []
 
-class Archive(object):
-	
-	def __init__(self, size):
-		self.PF1 = []
-		self.size = size #TODO
-
 
 #VIEW
 class View(object):
 	def __init__(self):
 		i = 0
 		
-	def draw1Generation(self, gen, limit):
+	def draw1Generation(self, gen):
 		plt.title(gen.name)
 		self.diaProps()
-		plt.plot(np.array(gen.distances)[0:limit], np.array(gen.standings)[0:limit], 'go')
-		plt.plot(np.array(gen.distances)[limit:], np.array(gen.standings)[limit:], 'ro')
+		
+		p1xs = []
+		p1ys = []
+		for i in gen.paretoFront[0]:
+			p1xs.append(i.totalDistance)
+			p1ys.append(i.totalStanding)
+
+		p2xs = []
+		p2ys = []
+		for i in gen.paretoFront[1]:
+			p2xs.append(i.totalDistance)
+			p2ys.append(i.totalStanding)
+
+		pRxs = []
+		pRys = []
+		for i in gen.paretoFront[2]:
+			pRxs.append(i.totalDistance)
+			pRys.append(i.totalStanding)
+
+		plt.plot(pRxs, pRys, 'go')
+		plt.plot(p1xs, p1ys, 'ro')
+		plt.plot(p2xs, p2ys, 'bo')
+		
 		plt.show()
 	
 	def drawNGenerations(self, nGen, n):
@@ -181,6 +196,7 @@ class View(object):
 		for i in paretofront:
 			xs.append(i.totalDistance)
 			ys.append(i.totalStanding)
+			
 		plt.plot(xs, ys, 'ro', label='archive data (prank==0)')
 		plt.show()
 	
@@ -194,8 +210,8 @@ class View(object):
 		print("+------------------------------------------------------------+")
 		print("| Project n°3 : 'Composition des poules pour un championnat' |")
 		print("+------------------------------------------------------------+")
-		print("|      author : Meike WEBER                                  |")
-		print("|     version : 0.4, 2016-05-07, 22:00                       |")		
+		print("|     authors : Meike WEBER, Sophie MOIRE                    |")
+		print("|     version : 0.5, 2016-05-10, 23:50                       |")		
 		print("+------------------------------------------------------------+")
 		print()
 
@@ -205,56 +221,68 @@ class Controler(object):
 	def __init__(self):		
 		self.evolutions = []
 		self.view = View()
+		self.numInd = 0
+		self.numGen = 0
+		self.perInh = 0
 
+	# CALCULATION PARAMETERS/INPUT
+	def input(self):
+		self.view.info()
+		auto = str(input("  Standard Configuration (Y:yes, N:no): "))
+		if (auto == "N") or (auto == "n"):
+			self.userInput()
+		else:
+			self.autoInput(numberOfIndividuums, numberOfGenerations, percentageOfDeath)
+		print()
 
 	def userInput(self):
-		self.view.info()
-		self.numI           = int(input("  Number of individuums per generation: "))
-		self.numG           = int(input("  Number of generations:                "))
+		self.numInd           = int(input("  Number of individuums per generation: "))
+		self.numGen           = int(input("  Number of generations:                "))
 		self.perInh = 1.0 - float(input("  Death rate:                           "))
-		print()
-	
-	def autoInput(self, numI, numG, perDeath):
-		self.view.info()
-		print("  Number of individuums per generation: "+str(numI))
-		self.numI = numI
-		print("  Number of generations:                "+str(numG))
-		self.numG = numG
+
+	def autoInput(self, numInd, numGen, perDeath):
+		print("  Number of individuums per generation: "+str(numInd))
+		self.numInd = numInd
+		print("  Number of generations:                "+str(numGen))
+		self.numGen = numGen
 		print("  Death rate:                           "+str(perDeath))
 		self.perInh = 1-perDeath
-		print()
 
-
-	def visualiseEvolution(self, gen, n):
-		self.view.drawNGenerations(gen, n)
-
-	def visualiseResult(self, paretoFront):
-		self.view.drawParetofront(paretoFront)
-
-#CREATE
+	# CREATION
 	def createEvolution(self):
-		self.limit = int(self.numI*self.perInh)
-		generations = []
-	#FstGen
-		fstGeneration = self.createStartPopulation(self.numI)
-		fstGeneration.sortGen()
-		generations.append(fstGeneration)
-#old	self.archive.PF1.append(fstGeneration.paretoFront)
+		newGenerations = []
 		
-	#iGen
-		lastGen = fstGeneration
-		for i in range(self.numG):
-			nextGen = self.createNextGeneration(lastGen, self.numI)
-			nextGen.sortGen()
-			generations.append(nextGen)
-#old		self.archive.PF1.append(nextGen.paretoFront)
-			lastGen = nextGen
+		# FIRST Generation
+		fstGeneration = self.createStartPopulation(self.numInd)
+		fstGeneration.sortGen()
+		fstGeneration.paretoFront = self.calcParetoFronts(fstGeneration.individuums)
+
+		newGenerations.append(fstGeneration)
+		
+		# NEXT Generations
+		lastGeneration = fstGeneration
+		for i in range(self.numGen):
+			nextGeneration = self.createNextGeneration(lastGeneration, self.numInd)
+			nextGeneration.sortGen()
+			nextGeneration.paretoFront = self.calcParetoFronts(nextGeneration.individuums)
 			
-		e = Evolution(generations)
-		e.paretoFront = generations[len(generations)-1].paretoFront
+			newGenerations.append(nextGeneration)
+			lastGeneration = nextGeneration
+			
+		e = Evolution(newGenerations)
+		e.paretoFront = newGenerations[len(newGenerations)-1].paretoFront[0]
 		
 		return e
 
+	def calcParetoFronts(self, individuums):
+		PF1 = self.calcParetoFront_Kung75(individuums)
+		rest = [x for x in individuums if x not in PF1]
+		
+		PF2 = self.calcParetoFront_Kung75(rest)
+		rest = [x for x in rest if x not in PF1]
+		
+		return [PF1, PF2, rest]
+		
 	def createNEvolutions(self, n):
 		self.evolutions = []
 		fronts = []
@@ -263,72 +291,87 @@ class Controler(object):
 			e = self.createEvolution()
 			fronts += e.paretoFront
 			self.evolutions.append(e)
+			print("Generation "+str(x)+" created.")
 		
 		paretoFront = self.calcParetoFront_Kung75(fronts)
 		
 		return (self.evolutions, paretoFront)
 
 	
-	def createStartPopulation(self, numIndividuums):
+	def createStartPopulation(self, numInd):
 		individuums = []
-		for x in range(numIndividuums):
+		for x in range(numInd):
 			individuums.append(self.createRandomIndividuum())
-			
-		newG = Generation(0, individuums)
-		#newG.fronts = self.calcAllFronts(individuums)
-		newG.paretoFront = self.calcParetoFront_Kung75(individuums)
 		
-		return newG
+		return Generation(0, individuums)
 		
 	def createRandomIndividuum(self):
-		#array PFilled with 'True'
-		DNA = np.ones(groupmembers, dtype=bool)
-		#positions for false in array
-		falses = np.random.permutation(groupmembers)[0:int(groupmembers/2)]
+		# array PFilled with 'True'
+		DNA = np.ones(N, dtype=bool)
+		
+		# positions for 'False' in array
+		falses = np.random.permutation(N)[0:int(N/2)]
 		DNA[falses]=False
-		return Individuum(np.matrix(DNA.reshape((1,groupmembers))))
+		return Individuum(np.matrix(DNA.reshape((1,N))))
 
 
-	def createNextGeneration(self, lastGen, numIndividuums):
+	def createNextGeneration(self, lastGen, numInd):
+		limit = int(self.numInd*self.perInh)
 	#SELECTION (of parents)
-		parents = lastGen.individuums[0:self.limit]
+		parents = lastGen.individuums[0:limit]
 		
 		# retake the pareto-optimal individuums of the previous generation
-		paretos = self.calcParetoFront_Kung75(lastGen.individuums)
-		newIs = paretos
+		paretos = lastGen.paretoFront[0]+lastGen.paretoFront[1]
+		newIs = paretos.copy()
+		print("RETAKE = "+str(len(newIs)))
 		
 		# cross all the parto-individuums with each other
-		for m in range(len(paretos)):
-			for f in range(len(paretos)):
-				if m != f:
+		max = len(paretos)
+		
+		if max > 1:
+			m = 0
+			while m < (max-1):
+				f = (1+m)
+				while f < max:
+					#print("mother="+str(m)+" father="+str(f))
 					newIs.append(self.createChild(paretos[m], paretos[f]))
+					f += 1
+				m += 1
+		print("AFTER FST CROSSING = "+str(len(newIs)))
 
-		# create 'numIndividuums' childs
-		for x in range(numIndividuums - len(newIs)):
-			motherIndex = randint(0,self.limit-1)
-			fatherIndex = randint(0,self.limit-1)
+		# create mutations
+		nMutations = 2
+		i = 0
+		
+		while i < nMutations:
+			for pI in paretos:
+				iTrue = np.random.choice(np.arange(0,pI.DNA.shape[1],1)[np.array(pI.DNA).flatten()])
+				iFalse = np.random.choice(np.arange(0,pI.DNA.shape[1],1)[np.array(np.logical_not(pI.DNA)).flatten()])
+				newI = Individuum(pI.DNA)
+				newI.DNA[0,iTrue] = False
+				newI.DNA[0,iFalse] = True
+				newIs.append(newI)
+			i += 1
+		
+		# create 'numInd' childs
+		for x in range(numInd - len(newIs)):
+			motherIndex = randint(0,limit-1)
+			fatherIndex = randint(0,limit-1)
 			while(motherIndex==fatherIndex):
-				fatherIndex = randint(0,self.limit-1)
+				fatherIndex = randint(0,limit-1)
 			
 			mother = parents[motherIndex]
 			father = parents[fatherIndex]
 
 			newIs.append(self.createChild(mother, father))
-		
-		newG = Generation((lastGen.genLevel+1), newIs)
-#old	newG.fronts = self.calcAllFronts(individuums)
-		newG.paretoFront = self.calcParetoFront_Kung75(newIs)
-		
-		return newG
+				
+		return Generation((lastGen.genLevel+1), newIs)
 
 	def createChild(self, mother, father):
 		motherDNA = mother.DNA
 		fatherDNA = father.DNA
-
-	#INHERITENCE
-		childDNA = motherDNA
+		childDNA  = motherDNA
 	
-	#MUTATION
 		# positions in DNA where motherDNA.value != fatherDNA.value
 		mismatchIndex = (motherDNA != fatherDNA)
 		numMismatch = np.sum(mismatchIndex)
@@ -459,11 +502,17 @@ class Controler(object):
 
 #MAIN
 c = Controler()
-#c.userInput()
-c.autoInput(100,10,0.5)
-e = c.createNEvolutions(10)
+c.input()
+e = c.createNEvolutions(25)
 
-c.visualiseResult(e[1])
+#for e in e[0]:
+#	for g in e.generations:
+#		c.view.draw1Generation(g)
+#		print(len(g.individuums))
 
-for x in e[0]:
-	c.visualiseEvolution(x.generations, [0,2,4,6])
+c.view.drawParetofront(e[1])
+
+#c.view.drawParetofront(e[0])
+
+#for x in e[0]:
+#	c.view.drawNGenerations(x.generations, [0,2,4,6])
